@@ -4,7 +4,14 @@
 A Discord bot that helps users manage personal timers with private message notifications. Users can create multiple timers, view them in a summary message, and cancel them using emoji reactions.
 
 ## Recent Changes
-- **2025-11-12**: Initial bot development
+- **2025-11-12 (v2.0)**: Major improvements and optimizations
+  - ✅ **Limite de 20 timers** par utilisateur (actifs + terminés non annulés)
+  - ✅ **Suppression des timers terminés** via emojis pour libérer de la place
+  - ✅ **Gestion avancée des rate limits** Discord (support de 200 utilisateurs × 20 timers)
+  - ✅ **Code entièrement commenté** en français pour les débutants
+  - ✅ **Optimisations de performance** pour gérer ~4000 timers simultanés
+  
+- **2025-11-12 (v1.0)**: Initial bot development
   - Created main bot with discord.js v14
   - Implemented timer management with JSON persistence
   - Added /add-timer slash command with flexible duration parsing
