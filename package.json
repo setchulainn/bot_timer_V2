@@ -1,0 +1,23 @@
+{
+  "name": "discord-timer-bot",
+  "version": "1.0.0",
+  "description": "Discord bot for managing personal timers with DM notifications",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js",
+    "register": "node register-commands.js"
+  },
+  "keywords": [
+    "discord",
+    "bot",
+    "timer",
+    "notifications"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "discord.js": "^14.24.2",
+    "express": "^4.21.2"
+  }
+}
