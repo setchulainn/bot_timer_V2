@@ -1,0 +1,151 @@
+ Cahier des charges – Bot Discord de gestion de timers personnels
+ Objectif
+Développer un bot Discord en Node.js (discord.js v14) permettant à chaque utilisateur de :
+•	Créer et gérer plusieurs timers personnels.
+•	Être notifié en message privé à la fin du timer.
+•	Visualiser tous ses timers actifs ou terminés via un message récapitulatif en DM.
+•	Annuler ses timers via des réactions d’émojis.
+________________________________________
+ 1. Structure générale
+•	Langage : JavaScript (Node.js)
+•	Librairies :
+o	discord.js v14
+o	express (ping uptime)
+o	fs (sauvegarde locale)
+•	Persistance : fichier JSON (timers.json)
+•	Hébergement compatible : Render, Replit ou tout service supportant Node.js
+________________________________________
+2. Fonctionnement général du bot
+2.1 Démarrage
+•	Le bot démarre via client.login(DISCORD_BOT_TOKEN).
+•	Un mini-serveur Express est lancé sur le port process.env.PORT pour répondre à UptimeRobot.
+•	Au démarrage :
+o	Le fichier timers.json est chargé.
+o	Les timers encore valides sont reprogrammés.
+o	Les messages récapitulatifs des utilisateurs sont régénérés et mis à jour.
+________________________________________
+ 3. Gestion des timers
+3.1 Commande Slash /add-timer
+•	Nom : add-timer
+•	Description : crée un nouveau timer avec notification privée.
+•	Options :
+o	texte (string, requis) : description du timer.
+o	duree (string, requis) : durée du timer (voir formats ci-dessous).
+Réponse :
+•	Si la durée est valide → message éphémère confirmant la création :
+•	⏱️ Timer **<texte>** démarré !
+•	Si le format est invalide → erreur éphémère :
+•	❌ Format invalide. Utilisez `2h30m`, `1d5h`, etc.
+________________________________________
+ 4. Formats de durée acceptés
+4.1 Formats supportés par parseDuration()
+Le bot accepte les durées composées de jours, heures et minutes dans presque toutes les combinaisons :
+Exemple saisie	Interprétation	Résultat
+1d	1 jour	86 400 000 ms
+2h	2 heures	7 200 000 ms
+45m	45 minutes	2 700 000 ms
+1d2h30m	1 jour, 2 heures, 30 min	95 400 000 ms
+3h15 (sans “m”)	3h15min	11 700 000 ms
+2h30m	2 heures 30 min	9 000 000 ms
+Le “m” (minutes) est optionnel.
+Si la saisie ne contient aucun nombre valide, la commande échoue.
+4.2 Expression régulière utilisée :
+/^(?:(\d+)d)?(?:(\d+)h)?(?:(\d+)m?)?$/i
+________________________________________
+ 5. Notifications à la fin d’un timer
+Quand un timer expire :
+•	Le bot envoie un DM privé à l’utilisateur :
+•	⌛ Votre timer **<texte>** s'est terminé <t:timestamp:R> !
+•	Le timer est marqué comme “terminé” (champ ended: true).
+•	Le message récapitulatif est automatiquement mis à jour.
+________________________________________
+ 6. Message récapitulatif (DM résumé)
+6.1 Contenu du message
+Le bot maintient un seul message par utilisateur contenant la liste de tous ses timers :
+•	Embed Discord :
+o	Titre : ⏱️ Gestion des timers
+o	Couleur : bleu Discord (0x5865F2)
+o	Description : liste des timers sous forme de lignes structurées
+o	Footer : Réagissez avec l'emoji correspondant pour annuler un timer
+o	Timestamp : affiché automatiquement
+6.2 Format des lignes
+Chaque timer est affiché sous forme :
+🇦 **A** · **<texte du timer>**
+└ Timer: <t:timestamp:R> le <t:timestamp:F>
+Si le timer est terminé :
+🇧 **B** · ~~<texte du timer>~~
+└ ~~Timer terminé <t:timestamp:R>~~
+6.3 Mises à jour automatiques
+•	Le message est mis à jour à chaque changement :
+o	Ajout, fin ou annulation d’un timer.
+•	Si un utilisateur n’a plus de timer → le message récapitulatif est supprimé.
+•	Les réactions sont nettoyées et réappliquées à chaque mise à jour pour correspondre aux timers actifs.
+________________________________________
+ 7. Réactions et annulation
+7.1 Attribution des emojis
+Les timers sont associés aux emojis 🇦 à 🇾 (jusqu’à 25 timers par utilisateur).
+Exemple :
+Timer	Emoji	Lettre
+1	🇦	A
+2	🇧	B
+3	🇨	C
+7.2 Annulation d’un timer
+Quand un utilisateur réagit :
+1.	Le bot identifie quel timer correspond à l’emoji.
+2.	Le timer est annulé :
+o	clearTimeout() du timer en cours.
+o	Suppression du timer de la mémoire.
+o	Mise à jour du message résumé.
+3.	L’utilisateur reçoit un DM :
+4.	✅ Timer **<texte>** annulé.
+5.	La réaction de l’utilisateur est supprimée pour éviter les doublons.
+7.3 Gestion d’erreurs
+•	Les réactions des bots sont ignorées.
+•	Si une réaction ou suppression échoue en DM, le bot logue mais ne bloque pas le flux.
+________________________________________
+ 8. Sauvegarde et rechargement
+8.1 Structure du fichier timers.json
+{
+  "timers": [
+    {
+      "id": "userId-timestamp",
+      "userId": "1234567890",
+      "text": "Réunion",
+      "endTime": 1700000000000,
+      "startTime": 1699990000000,
+      "ended": false
+    }
+  ],
+  "summaryMessages": [
+    {
+      "userId": "1234567890",
+      "messageId": "0987654321",
+      "channelId": "0987654321"
+    }
+  ]
+}
+8.2 Persistance
+•	Chaque création, mise à jour ou suppression de timer déclenche un saveTimers().
+•	Au démarrage, loadTimers() recharge :
+o	Les timers valides et les reprogramme.
+o	Les timers expirés marqués comme “terminés”.
+o	Les messages récapitulatifs existants.
+________________________________________
+ 9. Sécurité et stabilité
+•	Variables d’environnement requises :
+o	DISCORD_BOT_TOKEN
+o	DISCORD_CLIENT_ID
+•	Délai de 0.5s entre chaque ajout de réaction pour éviter le rate limit Discord.
+•	Gestion d’erreurs robustes sur :
+o	L’accès aux DM
+o	L’édition/suppression de message
+o	Le parsing des durées
+•	Aucun timer ou message perdu en cas de redémarrage.
+________________________________________
+ 10. Résumé du cycle d’usage
+1.	Utilisateur → /add-timer texte:"Cours" duree:"2h30m"
+2.	Bot → crée le timer, envoie confirmation, met à jour le message récapitulatif
+3.	Utilisateur → voit le message DM avec ses timers et leurs emojis
+4.	Utilisateur → réagit 🇦 → timer annulé, message mis à jour
+5.	Timer expire → DM automatique “⌛ terminé” + mise à jour du résumé
+6.	Bot redémarre → recharge les timers et récapitulatifs existants
