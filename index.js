@@ -578,6 +578,7 @@ client.on('interactionCreate', async (interaction) => {
   
   // Vérifie que c'est la commande /add-timer
   if (interaction.commandName === 'add-timer') {
+    await interaction.deferReply({ flags: 64 });
     // Récupère les paramètres de la commande
     const text = interaction.options.getString('texte');      // Description du timer
     const durationStr = interaction.options.getString('duree'); // Durée (ex: "2h30m")
@@ -589,9 +590,8 @@ client.on('interactionCreate', async (interaction) => {
     
     if (!duration) {
       // Format invalide : répond avec un message d'erreur éphémère (seul l'user le voit)
-      await interaction.reply({
+      await interaction.editReply({
         content: '❌ Format de durée invalide. Utilisez par exemple : `2h30m`, `1d5h`, `45m`, etc.',
-        ephemeral: true,
       });
       return; // Arrête l'exécution
     }
@@ -603,12 +603,11 @@ client.on('interactionCreate', async (interaction) => {
     
     if (currentTimerCount >= MAX_TIMERS_PER_USER) {
       // L'utilisateur a déjà 20 timers : refuse la création
-      await interaction.reply({
+      await interaction.editReply({
         content: `❌ Vous avez atteint la limite de **${MAX_TIMERS_PER_USER} timers** (actifs + terminés).\n\n` +
                  `💡 Pour créer un nouveau timer, vous devez d'abord supprimer les timers inutiles :\n` +
                  `• Cliquez sur les emojis des timers terminés pour les retirer\n` +
                  `• Annulez les timers actifs dont vous n'avez plus besoin`,
-        ephemeral: true,
       });
       
       console.log(`🚫 Tentative de création d'un 21ème timer par ${interaction.user.tag} (refusée)`);
@@ -645,11 +644,10 @@ client.on('interactionCreate', async (interaction) => {
     // ========================================
     // CONFIRMATION À L'UTILISATEUR
     // ========================================
-    await interaction.reply({
+    await interaction.editReply({
       content: `⏱️ Timer **${text}** démarré avec succès !\n` +
                `⏰ Expiration : <t:${Math.floor(timer.endTime / 1000)}:R>\n` +
-               `📨 Consultez vos messages privés pour gérer vos timers.`,
-      ephemeral: true, // Message visible uniquement par l'utilisateur
+               `📨 Consultez vos messages privés pour gérer vos timers.`, // Message visible uniquement par l'utilisateur
     });
     
     console.log(`✅ Timer créé par ${interaction.user.tag} : "${text}" (${durationStr})`);
