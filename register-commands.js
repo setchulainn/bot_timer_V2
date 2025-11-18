@@ -17,6 +17,12 @@ const commands = [
         description: 'Durée du timer (ex: 2h30m, 1d5h, 45m)',
         required: true,
       },
+      {
+        name: 'multiple',
+        type: 4,
+        description: 'Multiplicateur de durée (défaut = 1)',
+        required: false,
+      },
     ],
   },
 ];
