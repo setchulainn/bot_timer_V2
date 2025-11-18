@@ -582,11 +582,12 @@ client.on('interactionCreate', async (interaction) => {
     // Récupère les paramètres de la commande
     const text = interaction.options.getString('texte');      // Description du timer
     const durationStr = interaction.options.getString('duree'); // Durée (ex: "2h30m")
+    const multiple = interaction.options.getInteger('multiple') ?? 1; // Multiplicateur de la durée (1 par défaut)
     
     // ========================================
     // VALIDATION 1 : Format de durée
     // ========================================
-    const duration = parseDuration(durationStr);
+    let duration = parseDuration(durationStr);
     
     if (!duration) {
       // Format invalide : répond avec un message d'erreur éphémère (seul l'user le voit)
@@ -595,7 +596,7 @@ client.on('interactionCreate', async (interaction) => {
       });
       return; // Arrête l'exécution
     }
-    
+    duration = duration * multiple; // Application du multiplicateur
     // ========================================
     // VALIDATION 2 : Limite de 20 timers
     // ========================================
