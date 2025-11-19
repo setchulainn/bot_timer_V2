@@ -8,8 +8,6 @@ import { Client, GatewayIntentBits, Partials, EmbedBuilder } from 'discord.js';
 import express from 'express';
 // fs : système de fichiers Node.js pour sauvegarder/charger les timers
 import fs from 'fs';
-// import des commmandes "/"
-import './register-commands.js';
 
 // ============================================================================
 // CONFIGURATION DU CLIENT DISCORD
