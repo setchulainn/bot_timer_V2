@@ -514,7 +514,7 @@ async function scheduleTimer(timer) {
  * Événement déclenché une seule fois quand le bot se connecte à Discord
  * Charge les timers sauvegardés et les reprogramme
  */
-client.once('ready', async () => {
+client.once(''clientReady'', async () => {
   console.log('');
   console.log('🤖 ============================================');
   console.log(`✅ Bot connecté en tant que ${client.user.tag}`);
