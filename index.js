@@ -440,7 +440,7 @@ try {
         console.log("🔍 DEBUG: Tentative reaction:", emoji);
 
         try {
-          await message.react(emoji);
+          await message.react(EMOJI_LETTERS[i]);
           console.log("👍 DEBUG: reaction OK:", emoji);
         } catch (err) {
           console.error("❌ DEBUG: Reaction échouée pour", emoji);
