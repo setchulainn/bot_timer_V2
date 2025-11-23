@@ -441,12 +441,6 @@ try {
 
         try {
           await message.react(EMOJI_LETTERS[i]);
-          console.log("👍 DEBUG: reaction OK:", emoji);
-        } catch (err) {
-          console.error("❌ DEBUG: Reaction échouée pour", emoji);
-          console.error("❌ err.message:", err.message);
-          console.error("❌ err.stack:", err.stack);
-        }
       } catch (error) {
         // Si l'ajout de réaction échoue, on log mais on continue
         console.error(`⚠️ Impossible d'ajouter la réaction ${EMOJI_LETTERS[i]}:`, error.message);
