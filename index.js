@@ -370,7 +370,7 @@ async function updateSummaryMessage(userId) {
           console.log(`🔄 Message récapitulatif mis à jour pour ${userId}`);
         } catch (error) {
           // Si le message n'existe plus (supprimé manuellement par l'user), on en crée un nouveau
-          console.error('⚠️ Impossible de modifier le message, création d\'un nouveau:', error);
+          console.error('⚠️ Impossible de modifier le message, création d\'un nouveau:', error.message);
           await messageLimiter.waitIfNeeded();
           message = await channel.send({ embeds: [embed] });
           
