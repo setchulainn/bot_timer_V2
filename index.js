@@ -360,30 +360,30 @@ async function updateSummaryMessage(userId) {
     // ---- Mise à jour ou création du message ----
     if (summaryInfo) {
       // Un message récapitulatif existe déjà : on le met à jour
-      try {
-        message = await channel.messages.fetch(summaryInfo.messageId);
-        await message.edit({ embeds: [embed] });
-        
-        // Supprime toutes les anciennes réactions pour repartir à zéro
-        await message.reactions.removeAll();
-        
-        console.log(`🔄 Message récapitulatif mis à jour pour ${userId}`);
-      } catch (error) {
-        // Si le message n'existe plus (supprimé manuellement par l'user), on en crée un nouveau
-        console.error('⚠️ Impossible de modifier le message, création d\'un nouveau:', error.message);
-        
-        await messageLimiter.waitIfNeeded();
-        message = await channel.send({ embeds: [embed] });
-        
-        // Met à jour l'info du message dans la Map
-        summaryMessagesMap.set(userId, {
-          userId,
-          messageId: message.id,
-          channelId: channel.id,
-        });
-        
-        console.log(`📨 Nouveau message récapitulatif créé pour ${userId}`);
-      }
+        try {
+          message = await channel.messages.fetch(summaryInfo.messageId);
+          await message.edit({ embeds: [embed] });
+          
+          // Supprime toutes les anciennes réactions pour repartir à zéro
+          await message.reactions.removeAll();
+          
+          console.log(`🔄 Message récapitulatif mis à jour pour ${userId}`);
+        } catch (error) {
+          // Si le message n'existe plus (supprimé manuellement par l'user), on en crée un nouveau
+          console.error('⚠️ Impossible de modifier le message, création d\'un nouveau:', error.message);
+          console.error('⚠️ log pour debug:', error);
+          await messageLimiter.waitIfNeeded();
+          message = await channel.send({ embeds: [embed] });
+          
+          // Met à jour l'info du message dans la Map
+          summaryMessagesMap.set(userId, {
+            userId,
+            messageId: message.id,
+            channelId: channel.id,
+          });
+          
+          console.log(`📨 Nouveau message récapitulatif créé pour ${userId}`);
+        }
     } else {
       // Aucun message récapitulatif existant : on en crée un
       message = await channel.send({ embeds: [embed] });
