@@ -379,29 +379,39 @@ async function updateSummaryMessage(userId) {
     // ---- Mise à jour ou création du message ----
     if (summaryInfo) {
       // Un message récapitulatif existe déjà : on le met à jour
-        try {
-          message = await channel.messages.fetch(summaryInfo.messageId);
-          await message.edit({ embeds: [embed] });
-          
-          // Supprime toutes les anciennes réactions pour repartir à zéro
-          await message.reactions.removeAll();
-          
-          console.log(`🔄 Message récapitulatif mis à jour pour ${userId}`);
-        } catch (error) {
-          // Si le message n'existe plus (supprimé manuellement par l'user), on en crée un nouveau
-          console.error('⚠️ Impossible de modifier le message, création d\'un nouveau:', error.message);
-          await messageLimiter.waitIfNeeded();
-          message = await channel.send({ embeds: [embed] });
-          
-          // Met à jour l'info du message dans la Map
-          summaryMessagesMap.set(userId, {
-            userId,
-            messageId: message.id,
-            channelId: channel.id,
-          });
-          
-          console.log(`📨 Nouveau message récapitulatif créé pour ${userId}`);
-        }
+try {
+  console.log("🔍 DEBUG: Tentative fetch du message " + summaryInfo.messageId);
+  message = await channel.messages.fetch(summaryInfo.messageId);
+
+  console.log("🔍 DEBUG: Fetch OK, tentative message.edit()");
+  await message.edit({ embeds: [embed] });
+  console.log("🔍 DEBUG: message.edit() OK");
+
+  console.log("🔍 DEBUG: Tentative suppression réactions");
+  await message.reactions.removeAll();
+  console.log("🔍 DEBUG: removeAll() OK");
+
+  console.log(`🔄 Message récapitulatif mis à jour pour ${userId}`);
+} catch (error) {
+  console.error("🔥 DEBUG CATCH — ERREUR DÉTECTÉE !");
+  console.error("🔥 error.name:", error.name);
+  console.error("🔥 error.message:", error.message);
+  console.error("🔥 error.stack:", error.stack);
+
+  console.log("🔍 DEBUG: Comme le message est impossible à modifier, création d’un nouveau...");
+
+  await messageLimiter.waitIfNeeded();
+
+  message = await channel.send({ embeds: [embed] });
+
+  summaryMessagesMap.set(userId, {
+    userId,
+    messageId: message.id,
+    channelId: channel.id,
+  });
+
+  console.log(`📨 Nouveau message récapitulatif créé pour ${userId}`);
+}
     } else {
       // Aucun message récapitulatif existant : on en crée un
       message = await channel.send({ embeds: [embed] });
@@ -427,7 +437,16 @@ async function updateSummaryMessage(userId) {
       await reactionLimiter.waitIfNeeded();
       
       try {
-        await message.react(EMOJI_LETTERS[i]);
+        console.log("🔍 DEBUG: Tentative reaction:", emoji);
+
+        try {
+          await message.react(emoji);
+          console.log("👍 DEBUG: reaction OK:", emoji);
+        } catch (err) {
+          console.error("❌ DEBUG: Reaction échouée pour", emoji);
+          console.error("❌ err.message:", err.message);
+          console.error("❌ err.stack:", err.stack);
+        }
       } catch (error) {
         // Si l'ajout de réaction échoue, on log mais on continue
         console.error(`⚠️ Impossible d'ajouter la réaction ${EMOJI_LETTERS[i]}:`, error.message);
