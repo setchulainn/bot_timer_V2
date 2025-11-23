@@ -284,7 +284,7 @@ async function updateSummaryMessage(userId) {
         console.log(`🗑️ Message récapitulatif supprimé pour l'utilisateur ${userId}`);
       } catch (error) {
         // Si le message n'existe plus ou autre erreur, on continue sans bloquer
-        console.error('⚠️ Impossible de supprimer le message récapitulatif:', error.message);
+        console.error('⚠️ Impossible de supprimer le message récapitulatif:', error);
       }
       
       // Supprime l'entrée de la Map
