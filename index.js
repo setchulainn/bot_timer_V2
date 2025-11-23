@@ -30,6 +30,25 @@ const client = new Client({
   ],
 });
 
+// === DEBUG DISCORD.JS  ===
+client.rest.on('invalidRequestWarning', console.warn);
+
+client.on('error', (err) => {
+  console.error('🔥 [CLIENT ERROR]', err);
+});
+
+client.on('debug', (msg) => {
+  console.log('🐛 [DEBUG]', msg);
+});
+
+client.rest.on('rateLimited', (info) => {
+  console.warn('⏳ [RATE LIMIT]', info);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('❌ [UNHANDLED REJECTION]', reason);
+});
+
 // ============================================================================
 // CONFIGURATION DU SERVEUR EXPRESS (MONITORING)
 // ============================================================================
