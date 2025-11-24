@@ -178,6 +178,38 @@ function parseDuration(durationStr) {
 }
 
 // ============================================================================
+// FONCTION : SUPPRIMER TOUTES LES REACTIONS DU DIRECT MESSAGE (DM)
+// ============================================================================
+
+async function removeAllReactionsIndividually(message) {
+  try {
+    for (const [emoji, reaction] of message.reactions.cache) {
+
+      console.log(`🗑️ Suppression des réactions pour ${emoji}...`);
+
+      // On récupère la liste des utilisateurs qui ont réagi
+      const users = await reaction.users.fetch();
+
+      for (const user of users.values()) {
+        try {
+          await reaction.users.remove(user.id);
+          console.log(`   ✔️ Réaction retirée pour user ${user.id}`);
+          await new Promise(res => setTimeout(res, 300)); // anti-rate-limit
+        } catch (err) {
+          console.warn(`   ⚠️ Impossible de retirer pour ${user.id}: ${err.message}`);
+        }
+      }
+    }
+
+    console.log("✔️ Toutes les réactions ont été retirées (tous users)");
+  } catch (err) {
+    console.error("❌ Erreur removeAllReactionsIndividually:", err);
+  }
+}
+
+
+
+// ============================================================================
 // FONCTION : CHARGEMENT DES TIMERS DEPUIS LE FICHIER
 // ============================================================================
 
@@ -388,7 +420,7 @@ try {
   console.log("🔍 DEBUG: message.edit() OK");
 
   console.log("🔍 DEBUG: Tentative suppression réactions");
-  await message.reactions.removeAll();
+  await removeAllReactionsIndividually(message);
   console.log("🔍 DEBUG: removeAll() OK");
 
   console.log(`🔄 Message récapitulatif mis à jour pour ${userId}`);
