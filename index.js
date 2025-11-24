@@ -438,9 +438,9 @@ try {
       
       try {
         await message.react(EMOJI_LETTERS[i]);
-        console.log("👍 DEBUG: reaction OK:", emoji);
+        console.log("👍 DEBUG: reaction OK:", EMOJI_LETTERS[i]);
       } catch (err) {
-        console.error("❌ DEBUG: Reaction échouée pour", emoji);
+        console.error("❌ DEBUG: Reaction échouée pour", EMOJI_LETTERS[i]);
         console.error("❌ err.message:", err.message);
         console.error("❌ err.stack:", err.stack);
       }
