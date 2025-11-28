@@ -83,9 +83,9 @@ Le bot vous enverra un message de confirmation et créera un message récapitula
 ### Voir vos timers
 
 Consultez votre message privé du bot. Il contient :
-- 🟢 Timers actifs avec compte à rebours
-- ⚫ Timers terminés (barrés)
-- 🇦🇧🇨 Emojis pour chaque timer actif
+-  Timers actifs avec compte à rebours
+-  Timers terminés (barrés)
+- 🇦🇧🇨 Emojis pour chaque timer
 
 ### Annuler un timer
 
@@ -98,22 +98,7 @@ Quand un timer se termine, vous recevez automatiquement une notification :
 ⌛ Votre timer **Révisions** s'est terminé il y a quelques secondes !
 ```
 
-## Architecture technique
 
-- **discord.js v14** - Interactions Discord
-- **Express** - Serveur de ping pour monitoring uptime
-- **JSON** - Persistance locale des timers
-- **Emojis régionaux** - 🇦-🇾 (jusqu'à 25 timers par utilisateur)
 
-## Fichiers
 
-- `index.js` - Code principal du bot
-- `register-commands.js` - Enregistrement des commandes slash
-- `timers.json` - Sauvegarde des timers (créé automatiquement)
 
-## Support
-
-Le bot est compatible avec :
-- Render
-- Replit
-- Tout hébergeur Node.js supportant les websockets
