@@ -825,12 +825,6 @@ client.on('messageReactionAdd', async (reaction, user) => {
   // Met à jour le message récapitulatif (supprime le timer de la liste)
   await updateSummaryMessage(user.id);
   
-  // Supprime la réaction de l'utilisateur pour un retour visuel immédiat
-  try {
-    await reaction.users.remove(user.id);
-  } catch (error) {
-    console.error('⚠️ Impossible de supprimer la réaction de l\'utilisateur:', error.message);
-  }
 });
 
 // ============================================================================
