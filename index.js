@@ -646,7 +646,7 @@ client.on('interactionCreate', async (interaction) => {
         const messages = await dm.messages.fetch({ limit: 100 });
 
         // ID de ton message récapitulatif
-        const summaryMessageId = summaryMessageCache[user.id];
+        const summaryMessageId = summaryMessagesMap.get(user.id)?.messageId;;
 
         let deletedCount = 0;
 
