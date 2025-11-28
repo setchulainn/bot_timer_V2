@@ -830,10 +830,7 @@ client.on('messageReactionAdd', async (reaction, user) => {
 // ============================================================================
 
 if (interaction.commandName === 'cleanup') {
-    await interaction.reply({
-        content: "🧹 Nettoyage en cours... Vérification des messages dans vos DM.",
-        ephemeral: true
-    });
+    await interaction.deferReply({ flags: 64 })
 
     try {
         const user = interaction.user;
@@ -862,16 +859,14 @@ if (interaction.commandName === 'cleanup') {
             }
         }
 
-        await interaction.followUp({
-            content: `🧹 Nettoyage terminé ! **${deletedCount}** messages supprimés.`,
-            ephemeral: true
+        await interaction.editReply({
+            content: `Nettoyage terminé ! **${deletedCount}** messages supprimés.`,
         });
 
     } catch (error) {
         console.error("Erreur cleanup:", error);
-        await interaction.followUp({
+        await interaction.editReply({
             content: "❌ Impossible d'accéder à vos DM. Vérifiez que vous acceptez les messages privés.",
-            ephemeral: true
         });
     }
 }
