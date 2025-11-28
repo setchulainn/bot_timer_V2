@@ -826,6 +826,58 @@ client.on('messageReactionAdd', async (reaction, user) => {
 });
 
 // ============================================================================
+// ÉVÉNEMENT : COMMANDE SLASH /cleanup
+// ============================================================================
+
+if (interaction.commandName === 'cleanup') {
+    await interaction.reply({
+        content: "🧹 Nettoyage en cours... Vérification des messages dans vos DM.",
+        ephemeral: true
+    });
+
+    try {
+        const user = interaction.user;
+        const dm = await user.createDM();
+
+        const messages = await dm.messages.fetch({ limit: 100 });
+
+        // ID de ton message récapitulatif
+        const summaryMessageId = summaryMessageCache[user.id];
+
+        let deletedCount = 0;
+
+        for (const [id, msg] of messages) {
+
+            // ⚠️ On ignore le message récap
+            if (id === summaryMessageId) continue;
+
+            // On supprime uniquement les MESSAGES DU BOT
+            if (msg.author.id === client.user.id) {
+                try {
+                    await msg.delete();
+                    deletedCount++;
+                } catch (err) {
+                    console.log("Suppression impossible pour un message :", err.message);
+                }
+            }
+        }
+
+        await interaction.followUp({
+            content: `🧹 Nettoyage terminé ! **${deletedCount}** messages supprimés.`,
+            ephemeral: true
+        });
+
+    } catch (error) {
+        console.error("Erreur cleanup:", error);
+        await interaction.followUp({
+            content: "❌ Impossible d'accéder à vos DM. Vérifiez que vous acceptez les messages privés.",
+            ephemeral: true
+        });
+    }
+}
+
+
+// ============================================================================
 // SERVEUR EXPRESS POUR LE MONITORING (UPTIME)
 // ============================================================================
 
