@@ -8,8 +8,7 @@ Un bot Discord permettant de gérer des timers personnels avec notifications pri
 - 🔔 Recevoir des notifications en message privé quand un timer se termine
 - 📊 Visualiser tous vos timers dans un message récapitulatif
 - ❌ Annuler un timer avec une simple réaction emoji (🇦-🇾)
-- 💾 Persistance automatique - les timers survivent aux redémarrages
-- 🔄 Restauration automatique des timers actifs au démarrage
+
 
 ## Format de durée
 
@@ -75,9 +74,12 @@ npm start
 ### Créer un timer
 
 ```
-/add-timer texte:"Révisions" duree:"2h30m"
+/add-timer texte:"Révisions" duree:"2h30m" multiple:"2"
 ```
-
+- texte : la description du timer
+- duree : la durée du timer initiale
+- multiple : le nombre de fois par lequel multiplier la durée du timer. par défaut  = 1 . OPTIONNEL
+  
 Le bot vous enverra un message de confirmation et créera un message récapitulatif en DM.
 
 ### Voir vos timers
@@ -89,7 +91,10 @@ Consultez votre message privé du bot. Il contient :
 
 ### Annuler un timer
 
-Cliquez simplement sur l'emoji correspondant (🇦, 🇧, etc.) dans votre message récapitulatif.
+Cliquez 2 fois sur l'emoji correspondant (🇦, 🇧, etc.) dans votre message récapitulatif.
+(l'API discord ne permet pas au bot de retirer les réactions d'un utilisateur, il faurt donc réagir une seconde fois pour retirer sa propre réaction).
+
+Un message temporaire vous est envoyé en DM pour confirmer la prise en compte
 
 ### Expiration
 
@@ -98,7 +103,12 @@ Quand un timer se termine, vous recevez automatiquement une notification :
 ⌛ Votre timer **Révisions** s'est terminé il y a quelques secondes !
 ```
 
+### Nettoyage
 
+```
+/cleanup
+```
+Le bot supprime ses messages dans les DM SAUF le message récapitulatif des Timers
 
 
 
