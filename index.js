@@ -636,7 +636,50 @@ client.on('interactionCreate', async (interaction) => {
   // Vérifie que c'est bien une commande slash (pas un bouton ou menu)
   if (!interaction.isChatInputCommand()) return;
   
-  // Vérifie que c'est la commande /add-timer
+  if (interaction.commandName === 'cleanup') {
+    await interaction.deferReply({ flags: 64 })
+
+    try {
+        const user = interaction.user;
+        const dm = await user.createDM();
+
+        const messages = await dm.messages.fetch({ limit: 100 });
+
+        // ID de ton message récapitulatif
+        const summaryMessageId = summaryMessageCache[user.id];
+
+        let deletedCount = 0;
+
+        for (const [id, msg] of messages) {
+
+            // ⚠️ On ignore le message récap
+            if (id === summaryMessageId) continue;
+
+            // On supprime uniquement les MESSAGES DU BOT
+            if (msg.author.id === client.user.id) {
+                try {
+                    await msg.delete();
+                    deletedCount++;
+                } catch (err) {
+                    console.log("Suppression impossible pour un message :", err.message);
+                }
+            }
+        }
+
+        await interaction.editReply({
+            content: `Nettoyage terminé ! **${deletedCount}** messages supprimés.`,
+        });
+
+    } catch (error) {
+        console.error("Erreur cleanup:", error);
+        await interaction.editReply({
+            content: "❌ Impossible d'accéder à vos DM. Vérifiez que vous acceptez les messages privés.",
+        });
+    }
+  }
+
+  // COMMANDE /add-timer
+  //-----------------------------  
   if (interaction.commandName === 'add-timer') {
     await interaction.deferReply({ flags: 64 });
     // Récupère les paramètres de la commande
@@ -644,9 +687,7 @@ client.on('interactionCreate', async (interaction) => {
     const durationStr = interaction.options.getString('duree'); // Durée (ex: "2h30m")
     const multiple = interaction.options.getInteger('multiple') ?? 1; // Multiplicateur de la durée (1 par défaut)
     
-    // ========================================
     // VALIDATION 1 : Format de durée
-    // ========================================
     let duration = parseDuration(durationStr);
     
     if (!duration) {
@@ -657,9 +698,8 @@ client.on('interactionCreate', async (interaction) => {
       return; // Arrête l'exécution
     }
     duration = duration * multiple; // Application du multiplicateur
-    // ========================================
+
     // VALIDATION 2 : Limite de 20 timers
-    // ========================================
     const currentTimerCount = countUserTimers(interaction.user.id);
     
     if (currentTimerCount >= MAX_TIMERS_PER_USER) {
@@ -675,9 +715,7 @@ client.on('interactionCreate', async (interaction) => {
       return; // Arrête l'exécution
     }
     
-    // ========================================
     // CRÉATION DU TIMER
-    // ========================================
     const now = Date.now(); // Timestamp actuel en millisecondes
     
     // Construit l'objet timer
@@ -825,51 +863,6 @@ client.on('messageReactionAdd', async (reaction, user) => {
   
 });
 
-// ============================================================================
-// ÉVÉNEMENT : COMMANDE SLASH /cleanup
-// ============================================================================
-
-if (interaction.commandName === 'cleanup') {
-    await interaction.deferReply({ flags: 64 })
-
-    try {
-        const user = interaction.user;
-        const dm = await user.createDM();
-
-        const messages = await dm.messages.fetch({ limit: 100 });
-
-        // ID de ton message récapitulatif
-        const summaryMessageId = summaryMessageCache[user.id];
-
-        let deletedCount = 0;
-
-        for (const [id, msg] of messages) {
-
-            // ⚠️ On ignore le message récap
-            if (id === summaryMessageId) continue;
-
-            // On supprime uniquement les MESSAGES DU BOT
-            if (msg.author.id === client.user.id) {
-                try {
-                    await msg.delete();
-                    deletedCount++;
-                } catch (err) {
-                    console.log("Suppression impossible pour un message :", err.message);
-                }
-            }
-        }
-
-        await interaction.editReply({
-            content: `Nettoyage terminé ! **${deletedCount}** messages supprimés.`,
-        });
-
-    } catch (error) {
-        console.error("Erreur cleanup:", error);
-        await interaction.editReply({
-            content: "❌ Impossible d'accéder à vos DM. Vérifiez que vous acceptez les messages privés.",
-        });
-    }
-}
 
 
 // ============================================================================
