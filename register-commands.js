@@ -25,6 +25,10 @@ const commands = [
       },
     ],
   },
+  {
+    name: 'cleanup',
+    description: 'Supprime tous les messages du bot dans les DM de l\'user sauf le message récap.'
+  },
 ];
 
 const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_BOT_TOKEN);
