@@ -178,35 +178,50 @@ function parseDuration(durationStr) {
 }
 
 // ============================================================================
-// FONCTION : SUPPRIMER TOUTES LES REACTIONS DU DIRECT MESSAGE (DM)
+// FONCTION : MAJ DES REACTIONS DU DIRECT MESSAGE (DM)
 // ============================================================================
 
-async function removeAllReactionsIndividually(message) {
-  try {
-    for (const [emoji, reaction] of message.reactions.cache) {
-
-      console.log(`🗑️ Suppression des réactions pour ${emoji}...`);
-
-      // On récupère la liste des utilisateurs qui ont réagi
-      const users = await reaction.users.fetch();
-
-      for (const user of users.values()) {
-        try {
-          await reaction.users.remove(user.id);
-          console.log(`   ✔️ Réaction retirée pour user ${user.id}`);
-          await new Promise(res => setTimeout(res, 300)); // anti-rate-limit
-        } catch (err) {
-          console.warn(`   ⚠️ Impossible de retirer pour ${user.id}: ${err.message}`);
-        }
+/**
+ * Met à jour les réactions d'un message en n'ajoutant/supprimant que le nécessaire.
+ * @param {Message} message - Le message à mettre à jour
+ * @param {Array<string>} requiredEmojis - Liste des emojis qui doivent être présents
+ */
+  async function updateMessageReactions(message, requiredEmojis) {
+    try {
+      // --- Récupération de l’état actuel ---
+      await message.fetch(); // refresh
+      const current = [...message.reactions.cache.keys()];
+  
+      // --- Emojis à supprimer ---
+      const toRemove = current.filter(e => !requiredEmojis.includes(e));
+  
+      // --- Emojis à ajouter ---
+      const toAdd = requiredEmojis.filter(e => !current.includes(e));
+  
+      // --- Suppression intelligente des réactions ---
+      for (const emoji of toRemove) {
+        const reaction = message.reactions.cache.get(emoji);
+        if (!reaction) continue;
+  
+        // On retire uniquement la réaction du bot, pas celles des users
+        const botUser = message.client.user;
+  
+        await reaction.users.remove(botUser.id).catch(() => {});
+        await reactionLimiter.waitIfNeeded();
       }
+  
+      // --- Ajout uniquement des emojis manquants ---
+      for (const emoji of toAdd) {
+        await reactionLimiter.waitIfNeeded();
+        await message.react(emoji).catch(() => {});
+      }
+  
+      console.log("🔧 Réactions mises à jour avec optimisation.");
+  
+    } catch (err) {
+      console.error("❌ Erreur updateMessageReactions:", err.message);
     }
-
-    console.log("✔️ Toutes les réactions ont été retirées (tous users)");
-  } catch (err) {
-    console.error("❌ Erreur removeAllReactionsIndividually:", err);
   }
-}
-
 
 
 // ============================================================================
@@ -419,10 +434,6 @@ try {
   await message.edit({ embeds: [embed] });
   console.log("🔍 DEBUG: message.edit() OK");
 
-  console.log("🔍 DEBUG: Tentative suppression réactions");
-  await removeAllReactionsIndividually(message);
-  console.log("🔍 DEBUG: removeAll() OK");
-
   console.log(`🔄 Message récapitulatif mis à jour pour ${userId}`);
 } catch (error) {
   console.error("🔥 DEBUG CATCH — ERREUR DÉTECTÉE !");
@@ -458,25 +469,12 @@ try {
       console.log(`📨 Message récapitulatif créé pour ${userId}`);
     }
     
-    // ---- Ajout des réactions emoji (pour TOUS les timers : actifs ET terminés) ----
-    // Les utilisateurs peuvent cliquer pour annuler les timers actifs OU supprimer les timers terminés
-    // Cela permet de libérer de la place quand on atteint la limite de 20 timers
-    // On ajoute les réactions une par une avec un délai pour éviter le rate limit
+    // ---- Update des réactions emoji (pour TOUS les timers : actifs ET terminés) ----
     const totalTimers = activeTimers.length + endedTimers.length;
+    const requiredEmojis = EMOJI_LETTERS.slice(0, totalTimers);
+    await updateMessageReactions(message, requiredEmojis);
+
     
-    for (let i = 0; i < totalTimers; i++) {
-      // Respecte le rate limit des réactions (plus strict)
-      await reactionLimiter.waitIfNeeded();
-      
-      try {
-        await message.react(EMOJI_LETTERS[i]);
-        console.log("👍 DEBUG: reaction OK:", EMOJI_LETTERS[i]);
-      } catch (err) {
-        console.error("❌ DEBUG: Reaction échouée pour", EMOJI_LETTERS[i]);
-        console.error("❌ err.message:", err.message);
-        console.error("❌ err.stack:", err.stack);
-      }
-    }
     
     // Sauvegarde l'état après la mise à jour
     saveTimers();
