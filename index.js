@@ -812,7 +812,12 @@ client.on('messageReactionAdd', async (reaction, user) => {
       ? `✅ Timer **${timerToRemove.text}** annulé avec succès.`
       : `🗑️ Timer terminé **${timerToRemove.text}** supprimé avec succès.`;
     
-    await user.send(confirmMessage);
+    const sent = await user.send(confirmMessage);
+    // Suppression après 5 secondes
+    setTimeout(() => {
+      sent.delete().catch(() => {});
+    }, 5000);
+    
   } catch (error) {
     console.error('⚠️ Impossible d\'envoyer le message de confirmation:', error.message);
   }
